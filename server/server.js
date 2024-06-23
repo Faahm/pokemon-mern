@@ -4,6 +4,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const logger = require("morgan");
+const homeRoutes = require("./routes/home");
+const pokemonsRoutes = require("./routes/pokemons");
 const createHttpError = require("http-errors");
 const { isHttpError } = require("http-errors");
 
@@ -16,19 +18,28 @@ app.use(cors());
 
 app.use(express.json());
 
+app.use("/", homeRoutes);
+
+app.use("/pokemons", pokemonsRoutes);
+
 app.use((req, res, next) => {
   next(createHttpError(404, "Endpoint not found"));
 });
 
 app.use((error, req, res, next) => {
-  console.error(error);
-  let errorMessage = "An unknwon error occurred";
+  console.error("Error details:", {
+    message: error.message,
+    status: error.status,
+    stack: error.stack,
+  });
+  let errorMessage = "An unknown error occurred";
   let statusCode = 500;
+
   if (isHttpError(error)) {
     statusCode = error.status;
     errorMessage = error.message;
   }
-  res.status(500).json({ error: errorMessage });
+  res.status(statusCode).json({ error: errorMessage });
 });
 
 mongoose
