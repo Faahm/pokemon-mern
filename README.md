@@ -4,8 +4,8 @@
 
 ### Create a .env folder
 
-- After setting up your Mongo DB cloud server, copy its `ATLAS_URI` and paste it in the .env directory. Add a database name before `?retryWrites=true&w=majority`.
-- Also set your port number (e.g `PORT=5000`)
+- After setting up your Mongo DB cloud server, copy its `ATLAS_URI` and paste it in the .env file. Add a database name before `?retryWrites=true&w=majority`.
+- Set your port number (e.g `PORT=5000`)
 
 ### Populate your MongoDB Atlas database
 
