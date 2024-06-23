@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const corsOptions = require("./config/corsOptions");
 const logger = require("morgan");
 const homeRoutes = require("./routes/home");
 const pokemonsRoutes = require("./routes/pokemons");
@@ -14,7 +15,7 @@ const app = express();
 
 app.use(logger("dev"));
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
