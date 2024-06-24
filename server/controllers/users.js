@@ -88,4 +88,14 @@ const login = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getAuthUser };
+const logout = async (req, res, next) => {
+  req.session.destroy((error) => {
+    if (error) {
+      next(error);
+    } else {
+      res.sendStatus(200);
+    }
+  });
+};
+
+module.exports = { register, login, getAuthUser, logout };
