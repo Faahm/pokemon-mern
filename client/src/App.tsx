@@ -1,85 +1,43 @@
-import React, { useEffect, useState } from "react";
-import { Pokemon as PokemonModel } from "./models/pokemon";
-import Pokemon from "./components/Pokemon";
-import { Box, Grid, Spinner, Button } from "@chakra-ui/react";
-import { fetchPokemons, deletePokemon } from "./api/pokemons_api";
-import CreateEditPokemonModal from "./components/CreateEditPokemonModal";
+import { useEffect, useState } from "react";
+import LoginModal from "./components/LoginModal";
 import NavBar from "./components/NavBar";
+import RegisterModal from "./components/RegisterModal";
+import { User } from "./models/user";
+import { getLoggedInUser } from "./api/users_api";
+import { Box } from "@chakra-ui/react";
+import PokemonsPageLoggedInView from "./components/PokemonsPageLoggedInView";
+import PokemonsPageLoggedOutView from "./components/PokemonsPageLoggedOutView";
 
 function App() {
-  const [pokemons, setPokemons] = useState<PokemonModel[]>([]);
-  const [pokemonsLoading, setPokemonsLoading] = useState(true);
-  const [showPokemonsLoadingError, setShowPokemonsLoadingError] =
-    useState(false);
-
-  const [pokemonToEdit, setPokemonToEdit] = useState<PokemonModel | null>(null);
-  const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
-  const [isModalEditOpen, setIsModalEditOpen] = useState(false);
+  const [isModalRegisterOpen, setIsModalRegisterOpen] = useState(false);
+  const [isModalLoginOpen, setIsModalLoginOpen] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
 
   useEffect(() => {
-    async function loadPokemons() {
+    async function fetchLoggedInUser() {
       try {
-        setShowPokemonsLoadingError(false);
-        setPokemonsLoading(true);
-        const pokemons = await fetchPokemons();
-        setPokemons(pokemons);
+        const user = await getLoggedInUser();
+        setLoggedInUser(user);
       } catch (error) {
         console.error(error);
-        setShowPokemonsLoadingError(true);
-      } finally {
-        setPokemonsLoading(false);
       }
     }
-
-    loadPokemons();
+    fetchLoggedInUser();
   }, []);
-
-  async function handleDeletePokemon(pokemon: PokemonModel) {
-    try {
-      await deletePokemon(pokemon._id);
-      setPokemons(
-        pokemons.filter(
-          (existingPokemon) => existingPokemon._id !== pokemon._id
-        )
-      );
-    } catch (error) {
-      console.error(error);
-      alert(error);
-    }
-  }
-
-  const pokemonsGrid = (
-    <Grid
-      mt={5}
-      templateColumns={{
-        base: "repeat(1, 1fr)",
-        sm: "repeat(2, 1fr)",
-        md: "repeat(3, 1fr)",
-        lg: "repeat(4, 1fr)",
-      }}
-      gap={6}
-      maxW="1200px"
-      w="100%"
-    >
-      {pokemons.map((pokemon) => (
-        <Pokemon
-          pokemon={pokemon}
-          onPokemonClicked={setPokemonToEdit}
-          setIsModalOpen={setIsModalEditOpen}
-          onDeletePokemonClicked={handleDeletePokemon}
-          key={pokemon._id}
-        />
-      ))}
-    </Grid>
-  );
 
   return (
     <>
       <NavBar
-        loggedInUser={null}
-        onLoginClicked={() => {}}
-        onRegisterClicked={() => {}}
-        onLogoutSuccessful={() => {}}
+        loggedInUser={loggedInUser}
+        onLoginClicked={() => {
+          setIsModalLoginOpen(true);
+        }}
+        onRegisterClicked={() => {
+          setIsModalRegisterOpen(true);
+        }}
+        onLogoutSuccessful={() => {
+          setLoggedInUser(null);
+        }}
       />
 
       <Box
@@ -89,58 +47,38 @@ function App() {
         flexDirection="column"
         p={10}
       >
-        <Button onClick={() => setIsModalCreateOpen(true)} colorScheme="blue">
-          Create Pokémon
-        </Button>
-
-        {isModalCreateOpen && (
-          <CreateEditPokemonModal
-            isOpen={isModalCreateOpen}
-            onClose={() => {
-              setIsModalCreateOpen(false);
-            }}
-            onPokemonSaved={(newPokemon) => {
-              setPokemons([...pokemons, newPokemon]);
-              setIsModalCreateOpen(false);
-            }}
-          />
-        )}
-
-        {pokemonToEdit && (
-          <CreateEditPokemonModal
-            isOpen={isModalEditOpen}
-            onClose={() => {
-              setIsModalEditOpen(false);
-              setPokemonToEdit(null);
-            }}
-            pokemonToEdit={pokemonToEdit}
-            onPokemonSaved={(updatedPokemon) => {
-              setPokemons(
-                pokemons.map((existingPokemon) =>
-                  existingPokemon._id === updatedPokemon._id
-                    ? updatedPokemon
-                    : existingPokemon
-                )
-              );
-              setPokemonToEdit(null);
-            }}
-          />
-        )}
-
-        {pokemonsLoading && <Spinner size="xl" />}
-        {showPokemonsLoadingError && (
-          <p>Something went wrong. Please try again.</p>
-        )}
-        {!pokemonsLoading && !showPokemonsLoadingError && (
-          <>
-            {pokemons.length > 0 ? (
-              pokemonsGrid
-            ) : (
-              <p>You don't own any pokemon</p>
-            )}
-          </>
-        )}
+        <>
+          {loggedInUser ? (
+            <PokemonsPageLoggedInView />
+          ) : (
+            <PokemonsPageLoggedOutView />
+          )}
+        </>
       </Box>
+
+      {isModalRegisterOpen && (
+        <RegisterModal
+          isOpen={true}
+          onRegisterSuccessful={(user) => {
+            setLoggedInUser(user);
+          }}
+          onClose={() => {
+            setIsModalRegisterOpen(false);
+          }}
+        />
+      )}
+
+      {isModalLoginOpen && (
+        <LoginModal
+          isOpen={true}
+          onLoginSuccessful={(user) => {
+            setLoggedInUser(user);
+          }}
+          onClose={() => {
+            setIsModalLoginOpen(false);
+          }}
+        />
+      )}
     </>
   );
 }
