@@ -38,7 +38,7 @@ const getPokemon = async (req, res, next) => {
     }
 
     if (!pokemon.createdBy.equals(authenticatedUserId)) {
-      throw createHttpError(401, "You cannot access this note");
+      throw createHttpError(401, "You cannot access this pokemon");
     }
 
     res.status(200).json(pokemon);
@@ -143,7 +143,7 @@ const updatePokemon = async (req, res, next) => {
     }
 
     if (!pokemon.createdBy.equals(authenticatedUserId)) {
-      throw createHttpError(401, "You cannot access this note");
+      throw createHttpError(401, "You cannot access this pokemon");
     }
 
     pokemon.name = name;
@@ -177,7 +177,7 @@ const deletePokemon = async (req, res, next) => {
     }
 
     if (!pokemon.createdBy.equals(authenticatedUserId)) {
-      throw createHttpError(401, "You cannot access this note");
+      throw createHttpError(401, "You cannot access this pokemon");
     }
 
     await pokemon.deleteOne();
