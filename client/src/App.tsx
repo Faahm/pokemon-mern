@@ -1,12 +1,13 @@
+import { Box } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { getLoggedInUser } from "./api/users_api";
 import LoginModal from "./components/LoginModal";
 import NavBar from "./components/NavBar";
 import RegisterModal from "./components/RegisterModal";
 import { User } from "./models/user";
-import { getLoggedInUser } from "./api/users_api";
-import { Box } from "@chakra-ui/react";
-import PokemonsPageLoggedInView from "./components/PokemonsPageLoggedInView";
-import PokemonsPageLoggedOutView from "./components/PokemonsPageLoggedOutView";
+import NotFoundPage from "./pages/NotFoundPage";
+import PokemonsPage from "./pages/PokemonsPage";
 
 function App() {
   const [isModalRegisterOpen, setIsModalRegisterOpen] = useState(false);
@@ -18,6 +19,7 @@ function App() {
       try {
         const user = await getLoggedInUser();
         setLoggedInUser(user);
+        console.log(user);
       } catch (error) {
         console.error(error);
       }
@@ -26,60 +28,56 @@ function App() {
   }, []);
 
   return (
-    <>
-      <NavBar
-        loggedInUser={loggedInUser}
-        onLoginClicked={() => {
-          setIsModalLoginOpen(true);
-        }}
-        onRegisterClicked={() => {
-          setIsModalRegisterOpen(true);
-        }}
-        onLogoutSuccessful={() => {
-          setLoggedInUser(null);
-        }}
-      />
-
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexDirection="column"
-        p={10}
-      >
-        <>
-          {loggedInUser ? (
-            <PokemonsPageLoggedInView />
-          ) : (
-            <PokemonsPageLoggedOutView />
-          )}
-        </>
-      </Box>
-
-      {isModalRegisterOpen && (
-        <RegisterModal
-          isOpen={true}
-          onRegisterSuccessful={(user) => {
-            setLoggedInUser(user);
+    <BrowserRouter>
+      <>
+        <NavBar
+          loggedInUser={loggedInUser}
+          onLoginClicked={() => {
+            setIsModalLoginOpen(true);
           }}
-          onClose={() => {
-            setIsModalRegisterOpen(false);
+          onRegisterClicked={() => {
+            setIsModalRegisterOpen(true);
+          }}
+          onLogoutSuccessful={() => {
+            setLoggedInUser(null);
           }}
         />
-      )}
 
-      {isModalLoginOpen && (
-        <LoginModal
-          isOpen={true}
-          onLoginSuccessful={(user) => {
-            setLoggedInUser(user);
-          }}
-          onClose={() => {
-            setIsModalLoginOpen(false);
-          }}
-        />
-      )}
-    </>
+        <Box>
+          <Routes>
+            <Route
+              path="/"
+              element={<PokemonsPage loggedInUser={loggedInUser} />}
+            />
+            <Route path="/*" element={<NotFoundPage />} />
+          </Routes>
+        </Box>
+
+        {isModalRegisterOpen && (
+          <RegisterModal
+            isOpen={true}
+            onRegisterSuccessful={(user) => {
+              setLoggedInUser(user);
+            }}
+            onClose={() => {
+              setIsModalRegisterOpen(false);
+            }}
+          />
+        )}
+
+        {isModalLoginOpen && (
+          <LoginModal
+            isOpen={true}
+            onLoginSuccessful={(user) => {
+              setLoggedInUser(user);
+            }}
+            onClose={() => {
+              setIsModalLoginOpen(false);
+            }}
+          />
+        )}
+      </>
+    </BrowserRouter>
   );
 }
 
