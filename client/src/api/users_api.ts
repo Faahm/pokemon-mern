@@ -14,11 +14,13 @@ export interface RegisterCredentials {
   password: string;
 }
 
-export async function register(credetials: RegisterCredentials): Promise<User> {
+export async function register(
+  credentials: RegisterCredentials
+): Promise<User> {
   const response = await fetchData("http://localhost:5000/users/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(credetials),
+    body: JSON.stringify(credentials),
   });
   return response.json();
 }
@@ -28,11 +30,11 @@ export interface LoginCredentials {
   password: string;
 }
 
-export async function login(credetials: LoginCredentials): Promise<User> {
+export async function login(credentials: LoginCredentials): Promise<User> {
   const response = await fetchData("http://localhost:5000/users/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(credetials),
+    body: JSON.stringify(credentials),
   });
   return response.json();
 }
