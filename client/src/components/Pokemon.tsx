@@ -16,11 +16,18 @@ import {
 import { typeColors } from "../styles/typeColors";
 
 interface PokemonProps {
+  setIsModalOpen: any;
   pokemon: PokemonModel;
+  onPokemonClicked: (pokemon: PokemonModel) => void;
   onDeletePokemonClicked: (pokemon: PokemonModel) => void;
 }
 
-const Pokemon = ({ pokemon, onDeletePokemonClicked }: PokemonProps) => {
+const Pokemon = ({
+  pokemon,
+  setIsModalOpen,
+  onPokemonClicked,
+  onDeletePokemonClicked,
+}: PokemonProps) => {
   const { name, imgUrl, types, abilities } = pokemon;
 
   const capitalizedName = (string: string) => {
@@ -68,8 +75,16 @@ const Pokemon = ({ pokemon, onDeletePokemonClicked }: PokemonProps) => {
       <Divider />
       <CardFooter>
         <ButtonGroup spacing="2">
-          <Button variant="solid" colorScheme="orange">
-            View and Edit
+          <Button
+            variant="solid"
+            colorScheme="orange"
+            onClick={() => {
+              onPokemonClicked(pokemon);
+              setIsModalOpen(true);
+              console.log(pokemon);
+            }}
+          >
+            Edit
           </Button>
           <Button
             colorScheme="red"

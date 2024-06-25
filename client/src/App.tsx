@@ -4,8 +4,6 @@ import Pokemon from "./components/Pokemon";
 import { Box, Grid, Spinner, Button } from "@chakra-ui/react";
 import { fetchPokemons, deletePokemon } from "./api/pokemons_api";
 import CreateEditPokemonModal from "./components/CreateEditPokemonModal";
-import RegisterModal from "./components/RegisterModal";
-import LoginModal from "./components/LoginModal";
 import NavBar from "./components/NavBar";
 
 function App() {
@@ -13,6 +11,10 @@ function App() {
   const [pokemonsLoading, setPokemonsLoading] = useState(true);
   const [showPokemonsLoadingError, setShowPokemonsLoadingError] =
     useState(false);
+
+  const [pokemonToEdit, setPokemonToEdit] = useState<PokemonModel | null>(null);
+  const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
+  const [isModalEditOpen, setIsModalEditOpen] = useState(false);
 
   useEffect(() => {
     async function loadPokemons() {
@@ -62,6 +64,8 @@ function App() {
       {pokemons.map((pokemon) => (
         <Pokemon
           pokemon={pokemon}
+          onPokemonClicked={setPokemonToEdit}
+          setIsModalOpen={setIsModalEditOpen}
           onDeletePokemonClicked={handleDeletePokemon}
           key={pokemon._id}
         />
@@ -85,6 +89,44 @@ function App() {
         flexDirection="column"
         p={10}
       >
+        <Button onClick={() => setIsModalCreateOpen(true)} colorScheme="blue">
+          Create Pokémon
+        </Button>
+
+        {isModalCreateOpen && (
+          <CreateEditPokemonModal
+            isOpen={isModalCreateOpen}
+            onClose={() => {
+              setIsModalCreateOpen(false);
+            }}
+            onPokemonSaved={(newPokemon) => {
+              setPokemons([...pokemons, newPokemon]);
+              setIsModalCreateOpen(false);
+            }}
+          />
+        )}
+
+        {pokemonToEdit && (
+          <CreateEditPokemonModal
+            isOpen={isModalEditOpen}
+            onClose={() => {
+              setIsModalEditOpen(false);
+              setPokemonToEdit(null);
+            }}
+            pokemonToEdit={pokemonToEdit}
+            onPokemonSaved={(updatedPokemon) => {
+              setPokemons(
+                pokemons.map((existingPokemon) =>
+                  existingPokemon._id === updatedPokemon._id
+                    ? updatedPokemon
+                    : existingPokemon
+                )
+              );
+              setPokemonToEdit(null);
+            }}
+          />
+        )}
+
         {pokemonsLoading && <Spinner size="xl" />}
         {showPokemonsLoadingError && (
           <p>Something went wrong. Please try again.</p>
