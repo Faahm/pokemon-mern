@@ -10,10 +10,10 @@ import {
   Divider,
   ButtonGroup,
   Button,
-  Wrap,
-  WrapItem,
   Badge,
+  Box,
 } from "@chakra-ui/react";
+import { typeColors } from "../styles/typeColors";
 
 interface PokemonProps {
   pokemon: PokemonModel;
@@ -27,47 +27,49 @@ const Pokemon = ({ pokemon }: PokemonProps) => {
   };
 
   return (
-    <Card border="1px" borderColor="gray.200" maxW="sm">
+    <Card maxW="sm">
       <CardBody>
-        <Image
-          src={imgUrl}
-          alt={`${name}'s image`}
-          borderRadius="lg"
-          boxSize="150px"
-        />
+        <Box display="flex" justifyContent="center" alignItems="center">
+          <Image
+            src={imgUrl}
+            alt={`${name}'s image`}
+            borderRadius="lg"
+            boxSize="150px"
+          />
+        </Box>
         <Stack mt="6" spacing="3">
           <Heading size="md">{capitalizedName(name)}</Heading>
           <Divider />
           <Heading size="sm">Types</Heading>
-          <Wrap>
+          <Stack direction="row">
             {types.map((type) => (
-              <WrapItem key={type._id}>
-                <Badge p={1} borderRadius="md" colorScheme="blue">
-                  {type.name}
-                </Badge>
-              </WrapItem>
+              <Badge
+                key={type._id}
+                colorScheme={
+                  typeColors[type.name as keyof typeof typeColors] || "gray"
+                }
+              >
+                {type.name}
+              </Badge>
             ))}
-          </Wrap>
+          </Stack>
           <Divider />
           <Heading size="sm">Abilities</Heading>
-          <Wrap>
+          <Stack direction="row">
             {abilities.map((ability) => (
-              <WrapItem key={ability._id}>
-                <Badge p={1} borderRadius="md" colorScheme="green">
-                  {ability.name}
-                </Badge>
-              </WrapItem>
+              <Badge key={ability._id} colorScheme="gray">
+                {ability.name}
+              </Badge>
             ))}
-          </Wrap>
+          </Stack>
         </Stack>
       </CardBody>
       <Divider />
       <CardFooter>
         <ButtonGroup spacing="2">
-          <Button colorScheme="orange" variant="solid">
-            Details
+          <Button variant="solid" colorScheme="orange">
+            View and Edit
           </Button>
-          <Button colorScheme="red">Delete</Button>
         </ButtonGroup>
       </CardFooter>
     </Card>

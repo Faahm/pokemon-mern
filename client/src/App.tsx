@@ -1,46 +1,84 @@
 import React, { useEffect, useState } from "react";
 import { Pokemon as PokemonModel } from "./models/pokemon";
 import Pokemon from "./components/Pokemon";
-import { Box, Grid } from "@chakra-ui/react";
+import { Box, Grid, Spinner } from "@chakra-ui/react";
+import { fetchPokemons } from "./api/pokemons_api";
+import NavBar from "./components/NavBar";
 
 function App() {
   const [pokemons, setPokemons] = useState<PokemonModel[]>([]);
+  const [pokemonsLoading, setPokemonsLoading] = useState(true);
+  const [showPokemonsLoadingError, setShowPokemonsLoadingError] =
+    useState(false);
 
   useEffect(() => {
     async function loadPokemons() {
       try {
-        const response = await fetch("http://localhost:5000/", {
-          method: "GET",
-        });
-        const pokemons = await response.json();
+        setShowPokemonsLoadingError(false);
+        setPokemonsLoading(true);
+        const pokemons = await fetchPokemons();
         setPokemons(pokemons);
       } catch (error) {
         console.error(error);
-        alert(error);
+        setShowPokemonsLoadingError(true);
+      } finally {
+        setPokemonsLoading(false);
       }
     }
 
     loadPokemons();
   }, []);
 
+  const pokemonsGrid = (
+    <Grid
+      mt={5}
+      templateColumns={{
+        base: "repeat(1, 1fr)",
+        sm: "repeat(2, 1fr)",
+        md: "repeat(3, 1fr)",
+        lg: "repeat(4, 1fr)",
+      }}
+      gap={6}
+      maxW="1200px"
+      w="100%"
+    >
+      {pokemons.map((pokemon) => (
+        <Pokemon pokemon={pokemon} key={pokemon._id} />
+      ))}
+    </Grid>
+  );
+
   return (
-    <Box display="flex" justifyContent="center" p={10}>
-      <Grid
-        templateColumns={{
-          base: "repeat(1, 1fr)",
-          sm: "repeat(2, 1fr)",
-          md: "repeat(3, 1fr)",
-          lg: "repeat(4, 1fr)",
-        }}
-        gap={6}
-        maxW="1200px"
-        w="100%"
+    <>
+      <NavBar
+        loggedInUser={null}
+        onLoginClicked={() => {}}
+        onRegisterClicked={() => {}}
+        onLogoutSuccessful={() => {}}
+      />
+
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        flexDirection="column"
+        p={10}
       >
-        {pokemons.map((pokemon) => (
-          <Pokemon pokemon={pokemon} key={pokemon._id} />
-        ))}
-      </Grid>
-    </Box>
+        {pokemonsLoading && <Spinner size="xl" />}
+        {showPokemonsLoadingError && (
+          <p>Something went wrong. Please try again.</p>
+        )}
+        {!pokemonsLoading && !showPokemonsLoadingError && (
+          <>
+            {pokemons.length > 0 ? (
+              pokemonsGrid
+            ) : (
+              <p>You don't own any pokemon</p>
+            )}
+          </>
+        )}
+      </Box>
+    </>
   );
 }
 
