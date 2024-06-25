@@ -13,13 +13,15 @@ const { isHttpError } = require("http-errors");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const { requiresAuth } = require("./middleware/auth");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json");
 
 const PORT = process.env.PORT || 5000;
 const app = express();
 
 app.use(logger("dev"));
 
-app.use(cors(corsOptions));
+app.use(cors("corsOptions"));
 
 app.use(express.json());
 
@@ -37,6 +39,8 @@ app.use(
     }),
   })
 );
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/", homeRoutes);
 
