@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { User } from "../models/user";
 import { useForm } from "react-hook-form";
 import { RegisterCredentials } from "../api/users_api";
@@ -15,8 +15,10 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Alert,
 } from "@chakra-ui/react";
 import { register as registerUser } from "../api/users_api";
+import { ConflictError } from "../errors/http_errors";
 
 interface RegisterModalProps {
   isOpen: boolean;
@@ -29,22 +31,25 @@ const RegisterModal = ({
   onClose,
   onRegisterSuccessful,
 }: RegisterModalProps) => {
+  const [errorText, setErrorText] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<RegisterCredentials>();
 
   async function onSubmit(credentials: RegisterCredentials) {
     try {
       const newUser = await registerUser(credentials);
       onRegisterSuccessful(newUser);
-
-      reset();
       onClose();
     } catch (error) {
-      alert(error);
+      if (error instanceof ConflictError) {
+        setErrorText(error.message);
+      } else {
+        alert(error);
+      }
       console.error(error);
     }
   }
@@ -56,6 +61,7 @@ const RegisterModal = ({
         <ModalHeader>Register</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
+          {errorText && <Alert status="error">{errorText}</Alert>}
           <Box>
             <form id="registerForm" onSubmit={handleSubmit(onSubmit)}>
               <Stack spacing="4">

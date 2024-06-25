@@ -1,4 +1,3 @@
-import React from "react";
 import { User } from "../models/user";
 import {
   Modal,
@@ -13,10 +12,13 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Alert,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { LoginCredentials } from "../api/users_api";
 import { login as loginUser } from "../api/users_api";
+import { useState } from "react";
+import { UnauthorizedError } from "../errors/http_errors";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -29,22 +31,27 @@ const LoginModal = ({
   onClose,
   onLoginSuccessful,
 }: LoginModalProps) => {
+  const [errorText, setErrorText] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<LoginCredentials>();
 
   async function onSubmit(credentials: LoginCredentials) {
     try {
-      const newUser = await loginUser(credentials);
-      onLoginSuccessful(newUser);
+      const user = await loginUser(credentials);
+      onLoginSuccessful(user);
 
-      reset();
       onClose();
     } catch (error) {
-      alert(error);
+      if (error instanceof UnauthorizedError) {
+        setErrorText(error.message);
+      } else {
+        alert(error);
+      }
+
       console.error(error);
     }
   }
@@ -56,6 +63,7 @@ const LoginModal = ({
         <ModalHeader>Login</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
+          {errorText && <Alert status="error">{errorText}</Alert>}
           <Box>
             <form id="loginForm" onSubmit={handleSubmit(onSubmit)}>
               <Stack spacing="4">
