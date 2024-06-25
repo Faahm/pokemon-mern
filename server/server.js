@@ -21,7 +21,7 @@ const app = express();
 
 app.use(logger("dev"));
 
-app.use(cors("corsOptions"));
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
