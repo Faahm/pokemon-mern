@@ -17,9 +17,10 @@ import { typeColors } from "../styles/typeColors";
 
 interface PokemonProps {
   pokemon: PokemonModel;
+  onDeletePokemonClicked: (pokemon: PokemonModel) => void;
 }
 
-const Pokemon = ({ pokemon }: PokemonProps) => {
+const Pokemon = ({ pokemon, onDeletePokemonClicked }: PokemonProps) => {
   const { name, imgUrl, types, abilities } = pokemon;
 
   const capitalizedName = (string: string) => {
@@ -69,6 +70,15 @@ const Pokemon = ({ pokemon }: PokemonProps) => {
         <ButtonGroup spacing="2">
           <Button variant="solid" colorScheme="orange">
             View and Edit
+          </Button>
+          <Button
+            colorScheme="red"
+            onClick={(e) => {
+              onDeletePokemonClicked(pokemon);
+              e.stopPropagation();
+            }}
+          >
+            Delete
           </Button>
         </ButtonGroup>
       </CardFooter>

@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Pokemon as PokemonModel } from "./models/pokemon";
 import Pokemon from "./components/Pokemon";
-import { Box, Grid, Spinner } from "@chakra-ui/react";
-import { fetchPokemons } from "./api/pokemons_api";
+import { Box, Grid, Spinner, Button } from "@chakra-ui/react";
+import { fetchPokemons, deletePokemon } from "./api/pokemons_api";
+import CreateEditPokemonModal from "./components/CreateEditPokemonModal";
+import RegisterModal from "./components/RegisterModal";
+import LoginModal from "./components/LoginModal";
 import NavBar from "./components/NavBar";
 
 function App() {
@@ -29,6 +32,20 @@ function App() {
     loadPokemons();
   }, []);
 
+  async function handleDeletePokemon(pokemon: PokemonModel) {
+    try {
+      await deletePokemon(pokemon._id);
+      setPokemons(
+        pokemons.filter(
+          (existingPokemon) => existingPokemon._id !== pokemon._id
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert(error);
+    }
+  }
+
   const pokemonsGrid = (
     <Grid
       mt={5}
@@ -43,7 +60,11 @@ function App() {
       w="100%"
     >
       {pokemons.map((pokemon) => (
-        <Pokemon pokemon={pokemon} key={pokemon._id} />
+        <Pokemon
+          pokemon={pokemon}
+          onDeletePokemonClicked={handleDeletePokemon}
+          key={pokemon._id}
+        />
       ))}
     </Grid>
   );
