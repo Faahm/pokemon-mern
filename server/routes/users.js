@@ -5,10 +5,11 @@ const {
   getAuthUser,
   logout,
 } = require("../controllers/users");
+const { requiresAuth } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.get("/", getAuthUser);
+router.get("/", requiresAuth, getAuthUser);
 
 router.post("/register", register);
 

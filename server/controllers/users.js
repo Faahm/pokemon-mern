@@ -3,14 +3,10 @@ const createHttpError = require("http-errors");
 const bcrypt = require("bcrypt");
 
 const getAuthUser = async (req, res, next) => {
-  const authUserId = req.session.userId;
-
   try {
-    if (!authUserId) {
-      throw createHttpError(401, "User not authenticated");
-    }
-
-    const user = await User.findById(authUserId).select("+email").exec();
+    const user = await User.findById(req.session.userId)
+      .select("+email")
+      .exec();
     res.status(200).json(user);
   } catch (error) {
     next(error);

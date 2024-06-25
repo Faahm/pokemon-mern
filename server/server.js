@@ -12,6 +12,7 @@ const createHttpError = require("http-errors");
 const { isHttpError } = require("http-errors");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
+const { requiresAuth } = require("./middleware/auth");
 
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -41,7 +42,7 @@ app.use("/", homeRoutes);
 
 app.use("/users", usersRoutes);
 
-app.use("/pokemons", pokemonsRoutes);
+app.use("/pokemons", requiresAuth, pokemonsRoutes);
 
 app.use((req, res, next) => {
   next(createHttpError(404, "Endpoint not found"));

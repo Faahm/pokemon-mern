@@ -5,8 +5,12 @@ const createHttpError = require("http-errors");
 const mongoose = require("mongoose");
 
 const getPokemons = async (req, res, next) => {
+  const authenticatedUserId = req.session.userId;
+
   try {
-    const pokemons = await Pokemon.find().populate("types abilities").exec();
+    const pokemons = await Pokemon.find({ createdBy: authenticatedUserId })
+      .populate("types abilities")
+      .exec();
 
     res.status(200).json(pokemons);
   } catch (error) {
@@ -16,6 +20,8 @@ const getPokemons = async (req, res, next) => {
 
 const getPokemon = async (req, res, next) => {
   const pokemonId = req.params.pokemonId;
+  const authenticatedUserId = req.session.userId;
+
   try {
     if (!mongoose.isValidObjectId(pokemonId)) {
       throw createHttpError(400, "Invalid pokemon id");
@@ -29,6 +35,10 @@ const getPokemon = async (req, res, next) => {
       throw createHttpError(404, "Pokemon not found");
     }
 
+    if (!pokemon.createdBy.equals(authenticatedUserId)) {
+      throw createHttpError(401, "You cannot access this note");
+    }
+
     res.status(200).json(pokemon);
   } catch (error) {
     next(error);
@@ -37,6 +47,7 @@ const getPokemon = async (req, res, next) => {
 
 const createPokemon = async (req, res, next) => {
   const { name, imgUrl, types, abilities } = req.body;
+  const authenticatedUserId = req.session.userId;
 
   try {
     if (!name || !imgUrl || !types || !abilities) {
@@ -76,6 +87,7 @@ const createPokemon = async (req, res, next) => {
       imgUrl,
       types: typesArray,
       abilities: abilitiesArray,
+      createdBy: authenticatedUserId,
     });
 
     res.status(201).json(newPokemon);
@@ -86,6 +98,7 @@ const createPokemon = async (req, res, next) => {
 
 const updatePokemon = async (req, res, next) => {
   const pokemonId = req.params.pokemonId;
+  const authenticatedUserId = req.session.userId;
   const { name, imgUrl, types, abilities } = req.body;
 
   try {
@@ -127,6 +140,10 @@ const updatePokemon = async (req, res, next) => {
       throw createHttpError(404, "Pokemon not found");
     }
 
+    if (!pokemon.createdBy.equals(authenticatedUserId)) {
+      throw createHttpError(401, "You cannot access this note");
+    }
+
     pokemon.name = name;
     pokemon.imgUrl = imgUrl;
     pokemon.types = typesArray;
@@ -142,6 +159,7 @@ const updatePokemon = async (req, res, next) => {
 
 const deletePokemon = async (req, res, next) => {
   const pokemonId = req.params.pokemonId;
+  const authenticatedUserId = req.session.userId;
 
   try {
     if (!mongoose.isValidObjectId(pokemonId)) {
@@ -154,6 +172,10 @@ const deletePokemon = async (req, res, next) => {
 
     if (!pokemon) {
       throw createHttpError(404, "Pokemon not found");
+    }
+
+    if (!pokemon.createdBy.equals(authenticatedUserId)) {
+      throw createHttpError(401, "You cannot access this note");
     }
 
     await pokemon.deleteOne();
