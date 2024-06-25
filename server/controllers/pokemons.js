@@ -8,7 +8,9 @@ const getPokemons = async (req, res, next) => {
   const authenticatedUserId = req.session.userId;
 
   try {
-    const pokemons = await Pokemon.find({ createdBy: authenticatedUserId })
+    const pokemons = await Pokemon.find({
+      $or: [{ createdBy: authenticatedUserId }, { createdBy: null }],
+    })
       .populate("types abilities")
       .exec();
 
