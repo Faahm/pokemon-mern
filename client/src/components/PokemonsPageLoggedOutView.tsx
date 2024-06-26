@@ -49,18 +49,15 @@ const PokemonsPageLoggedOutView = () => {
 
   return (
     <>
+      <div>
+        Please login to create, view and edit, and delete your own pokemon.
+      </div>
       {pokemonsLoading && <Spinner size="xl" />}
       {showPokemonsLoadingError && (
         <p>Something went wrong. Please try again.</p>
       )}
       {!pokemonsLoading && !showPokemonsLoadingError && (
-        <>
-          {pokemons.length > 0 ? (
-            pokemonsGrid
-          ) : (
-            <p>You don't own any pokemon</p>
-          )}
-        </>
+        <>{pokemons.length > 0 ? pokemonsGrid : <p>No pokemons to show.</p>}</>
       )}
     </>
   );
