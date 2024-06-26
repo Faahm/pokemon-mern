@@ -17,7 +17,6 @@ describe("Pokemon Endpoints", () => {
   let userToken;
   let createdPokemonId;
 
-  // login a user to get a session token
   beforeAll(async () => {
     const res = await request(app).post("/users/login").send({
       username: "testuser",
@@ -42,14 +41,12 @@ describe("Pokemon Endpoints", () => {
     createdPokemonId = res.body._id;
   });
 
-  // Fetch all Pokémon
   it("should fetch all pokemons", async () => {
     const res = await request(app).get("/").set("Cookie", userToken);
     expect(res.statusCode).toEqual(200);
     expect(res.body.length).toBeGreaterThan(0);
   });
 
-  // Fetch a specific Pokémon by ID
   it("should fetch a pokemon by id", async () => {
     const res = await request(app)
       .get(`/pokemons/${createdPokemonId}`)
@@ -58,7 +55,6 @@ describe("Pokemon Endpoints", () => {
     expect(res.body).toHaveProperty("name", "Testy");
   });
 
-  // Update the Pokémon
   it("should update the pokemon", async () => {
     const res = await request(app)
       .patch(`/pokemons/${createdPokemonId}`)
@@ -74,7 +70,6 @@ describe("Pokemon Endpoints", () => {
     expect(res.body).toHaveProperty("name", "Testy V0");
   });
 
-  // Delete the Pokémon
   it("should delete the pokemon", async () => {
     const res = await request(app)
       .delete(`/pokemons/${createdPokemonId}`)
@@ -82,7 +77,6 @@ describe("Pokemon Endpoints", () => {
     expect(res.statusCode).toEqual(204);
   });
 
-  // Check if the Pokémon is deleted
   it("should return 404 for deleted pokemon", async () => {
     const res = await request(app)
       .get(`/pokemons/${createdPokemonId}`)
