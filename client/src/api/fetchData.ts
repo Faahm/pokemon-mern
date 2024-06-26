@@ -1,7 +1,15 @@
 import { ConflictError, UnauthorizedError } from "../errors/http_errors";
 
-export async function fetchData(input: RequestInfo, init?: RequestInit) {
-  const response = await fetch(input, init);
+export async function fetchData(
+  input: RequestInfo,
+  init?: RequestInit
+): Promise<Response> {
+  const modifiedInit: RequestInit = {
+    ...init,
+    credentials: "include",
+  };
+
+  const response = await fetch(input, modifiedInit);
   if (response.ok) {
     return response;
   } else {
@@ -13,7 +21,7 @@ export async function fetchData(input: RequestInfo, init?: RequestInit) {
       throw new ConflictError(errorMessage);
     } else {
       throw Error(
-        "Request failed with status:" +
+        "Request failed with status: " +
           response.status +
           " message: " +
           errorMessage
